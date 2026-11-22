@@ -1,138 +1,58 @@
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-const I = process.env.MAKEFUN_INPUT_DIR ?? '/input', O = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
-function run(p, q) {
-  const S = new Int32Array(256), C = new Int32Array(64), M = new Int32Array(256), o = new Uint8Array(65536);
-  let s = 0, c = 0, l = 0, i = 0, x = 0, t = 0;
-  const n = p.length, e = y => [o.subarray(0, l), y];
-  for (;;) {
-    if (t === 1e6) return e(10);
-    if (x < 0 || x >= n) return e(9);
-    const k = p[x], m = k === 1 ? 1 : k === 2 ? 4 : k > 47 && k < 52 ? 2 : 0;
-    if (x + m >= n) return e(9);
-    t++;
-    const z = x + 1 + m;
-    x = z;
-    switch (k) {
-      case 0: return e(0);
-      case 1:
-        if (s > 255) return e(3);
-        S[s++] = (p[z - 1] << 24) >> 24;
-        break;
-      case 2:
-        if (s > 255) return e(3);
-        S[s++] = p[z - 4] | p[z - 3] << 8 | p[z - 2] << 16 | p[z - 1] << 24;
-        break;
-      case 3:
-        if (s < 1) return e(2);
-        s--;
-        break;
-      case 4:
-        if (s < 1) return e(2);
-        if (s > 255) return e(3);
-        S[s] = S[s - 1];
-        s++;
-        break;
-      case 5:
-        if (s < 2) return e(2);
-        { const v = S[s - 1]; S[s - 1] = S[s - 2]; S[s - 2] = v; }
-        break;
-      case 6:
-        if (s < 2) return e(2);
-        if (s > 255) return e(3);
-        S[s] = S[s - 2];
-        s++;
-        break;
-      case 7:
-        if (s < 3) return e(2);
-        { const a = S[s - 3]; S[s - 3] = S[s - 2]; S[s - 2] = S[s - 1]; S[s - 1] = a; }
-        break;
-      case 23:
-        if (s < 1) return e(2);
-        S[s - 1] = -S[s - 1] | 0;
-        break;
-      case 27:
-        if (s < 1) return e(2);
-        S[s - 1] = ~S[s - 1];
-        break;
-      case 16: case 17: case 18: case 19: case 20: case 21: case 22:
-      case 24: case 25: case 26: case 28: case 29: case 30: case 32: case 33: case 34: {
-        if (s < 2) return e(2);
-        const b = S[s - 1], a = S[s - 2];
-        let r;
-        if (k > 18 && k < 23) {
-          if (!b) return e(4);
-          r = k === 19 ? a === -2147483648 && b === -1 ? a : a / b | 0
-            : k === 20 ? b === -1 ? 0 : a % b | 0
-            : k === 21 ? (a >>> 0) / (b >>> 0) | 0 : (a >>> 0) % (b >>> 0) | 0;
-        } else r = k === 16 ? a + b | 0 : k === 17 ? a - b | 0 : k === 18 ? Math.imul(a, b)
-          : k === 24 ? a & b : k === 25 ? a | b : k === 26 ? a ^ b : k === 28 ? a << b
-          : k === 29 ? a >> b : k === 30 ? a >>> b | 0 : k === 32 ? a === b ? 1 : 0
-          : k === 33 ? a < b ? 1 : 0 : (a >>> 0) < (b >>> 0) ? 1 : 0;
-        s -= 2;
-        S[s++] = r;
-        break;
-      }
-      case 48: case 49: case 50: {
-        const v = ((p[z - 2] | p[z - 1] << 8) << 16) >> 16;
-        let g = true;
-        if (k !== 48) {
-          if (s < 1) return e(2);
-          const w = S[--s];
-          g = k === 49 ? w === 0 : w !== 0;
-        }
-        if (g) x = z + v;
-        break;
-      }
-      case 51:
-        if (c === 64) return e(7);
-        C[c++] = z;
-        x = p[z - 2] | p[z - 1] << 8;
-        break;
-      case 52:
-        if (c === 0) return e(8);
-        x = C[--c];
-        break;
-      case 64:
-        if (s < 1) return e(2);
-        { const a = S[s - 1];
-          if (a < 0 || a > 255) return e(6);
-          S[s - 1] = M[a]; }
-        break;
-      case 65: {
-        if (s < 2) return e(2);
-        const a = S[s - 1], v = S[s - 2];
-        if (a < 0 || a > 255) return e(6);
-        s -= 2;
-        M[a] = v;
-        break;
-      }
-      case 80: {
-        if (s < 1) return e(2);
-        const w = String(S[s - 1]);
-        if (l + w.length > 65536) return e(11);
-        s--;
-        for (let j = 0; j < w.length; j++) o[l++] = w.charCodeAt(j);
-        break;
-      }
-      case 81:
-        if (s < 1) return e(2);
-        if (l + 1 > 65536) return e(11);
-        o[l++] = S[--s] & 255;
-        break;
-      case 82:
-        if (s > 255) return e(3);
-        S[s++] = i < q.length ? q[i++] : -1;
-        break;
-      case 83:
-        if (s < 1) return e(2);
-        return e(S[--s] & 255);
-      default: return e(5);
-    }
-  }
+import{readFileSync as r,writeFileSync as w,mkdirSync as m,readdirSync as d}from'node:fs';
+import{join as j}from'node:path';
+const I=process.env.MAKEFUN_INPUT_DIR??'/input',O=process.env.MAKEFUN_OUTPUT_DIR??'/output';
+for(const id of d(I).sort()){
+const P=r(j(I,id,'program.bin')),Q=r(j(I,id,'input.bin'));
+let S=[],C=[],M=[],o='',p=0,q=0,k=0,x=0;
+const N=(a,c)=>{if(S.length<a)throw 2;if(S.length-a+c>256)throw 3};
+const B=(f,g)=>{N(2,1);let b=S.pop(),a=S.pop();if(g&&!b)throw 4;S.push(f(a,b))};
+const U=f=>{N(1,1);S.push(f(S.pop()))};
+try{for(;;){
+if(k++>=1e6)throw 10;
+if(p<0||p>=P.length)throw 9;
+let b=P[p++],t,v;
+switch(b){
+case 0:throw 0;
+case 1:if(p>=P.length)throw 9;N(0,1);S.push(P[p++]<<24>>24);break;
+case 2:if(p+4>P.length)throw 9;N(0,1);S.push(P[p]|P[p+1]<<8|P[p+2]<<16|P[p+3]<<24);p+=4;break;
+case 3:N(1,0);S.pop();break;
+case 4:N(1,2);S.push(S[S.length-1]);break;
+case 5:N(2,2);t=S.pop();v=S.pop();S.push(t,v);break;
+case 6:N(2,3);S.push(S[S.length-2]);break;
+case 7:N(3,3);t=S.pop();v=S.pop();S.push(v,t,S.pop());break;
+case 16:B((a,b)=>a+b|0);break;
+case 17:B((a,b)=>a-b|0);break;
+case 18:B((a,b)=>Math.imul(a,b));break;
+case 19:B((a,b)=>a/b|0,1);break;
+case 20:B((a,b)=>a%b|0,1);break;
+case 21:B((a,b)=>(a>>>0)/(b>>>0)|0,1);break;
+case 22:B((a,b)=>(a>>>0)%(b>>>0)|0,1);break;
+case 23:U(a=>-a|0);break;
+case 24:B((a,b)=>a&b);break;
+case 25:B((a,b)=>a|b);break;
+case 26:B((a,b)=>a^b);break;
+case 27:U(a=>~a);break;
+case 28:B((a,b)=>a<<b);break;
+case 29:B((a,b)=>a>>b);break;
+case 30:B((a,b)=>a>>>b|0);break;
+case 32:B((a,b)=>+(a==b));break;
+case 33:B((a,b)=>+(a<b));break;
+case 34:B((a,b)=>+((a>>>0)<(b>>>0)));break;
+case 48:if(p+2>P.length)throw 9;t=P[p]|P[p+1]<<8;p+=2;p+=(t<<16)>>16;break;
+case 49:if(p+2>P.length)throw 9;N(1,0);t=P[p]|P[p+1]<<8;p+=2;if(!S.pop())p+=(t<<16)>>16;break;
+case 50:if(p+2>P.length)throw 9;N(1,0);t=P[p]|P[p+1]<<8;p+=2;if(S.pop())p+=(t<<16)>>16;break;
+case 51:if(p+2>P.length)throw 9;if(C.length>63)throw 7;t=P[p]|P[p+1]<<8;p+=2;C.push(p);p=t;break;
+case 52:if(!C.length)throw 8;p=C.pop();break;
+case 64:U(a=>{if(a<0||a>255)throw 6;return M[a]|0});break;
+case 65:N(2,0);t=S.pop();v=S.pop();if(t<0||t>255)throw 6;M[t]=v;break;
+case 80:N(1,0);v=S.pop();t=String(v);if(o.length+t.length>65536)throw 11;o+=t;break;
+case 81:N(1,0);if(o.length>65535)throw 11;o+=String.fromCharCode(S.pop()&255);break;
+case 82:N(0,1);S.push(q<Q.length?Q[q++]:-1);break;
+case 83:N(1,0);throw S.pop()&255;
+default:throw 5;
 }
-for (const d of readdirSync(I).sort()) {
-  const [u, y] = run(readFileSync(I + '/' + d + '/program.bin'), readFileSync(I + '/' + d + '/input.bin'));
-  mkdirSync(O + '/' + d, { recursive: true });
-  writeFileSync(O + '/' + d + '/stdout.bin', u);
-  writeFileSync(O + '/' + d + '/exit.txt', y + '\n');
+}}catch(e){x=e}
+m(j(O,id),{recursive:true});
+w(j(O,id,'stdout.bin'),Buffer.from(o,'latin1'));
+w(j(O,id,'exit.txt'),x+'\n');
 }
